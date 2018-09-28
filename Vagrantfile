@@ -1,5 +1,5 @@
 # Settings
-BOX = "fedora/28-cloud-base"
+BOX = "debian/stretch64"
 CREATE_RUN_ON_ALL_SCRIPT = true
 NETWORK_SUBNET = "10.10.10"
 NODES_COUNT = 3
@@ -7,6 +7,8 @@ NODES_PREFIX = "node"
 PROVISION_ANSIBLE_CREATE_INVENTORY = true
 PROVISION_ANSIBLE_PLAYBOOK = ""
 PROVISION_ANSIBLE_START_AT_TASK = ""
+PROVISION_SCRIPT = <<SCRIPT
+SCRIPT
 SSH_ADD_USER_KEYS = true
 VM_CPUS = 1
 VM_MEMORY = 2000
@@ -56,8 +58,14 @@ Vagrant.configure("2") do |config|
 
   config.vm.box = BOX
 
+  config.vm.synced_folder ".", "/vagrant", disabled: true
+
   if SSH_ADD_USER_KEYS
     config.vm.provision "shell", privileged: false, inline: $ssh_user_key_script
+  end
+
+  if PROVISION_SCRIPT.length > 0
+    config.vm.provision "shell", inline: PROVISION_SCRIPT
   end
 
   (1..NODES_COUNT).each() do |i|
